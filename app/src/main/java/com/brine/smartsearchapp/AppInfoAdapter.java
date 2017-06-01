@@ -1,6 +1,8 @@
 package com.brine.smartsearchapp;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +40,7 @@ public class AppInfoAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public Object getItem(int i) {
-        return mOriginalAppInfos.get(i);
+        return mDisplayAppInfos.get(i);
     }
 
     @Override
@@ -66,6 +69,17 @@ public class AppInfoAdapter extends BaseAdapter implements Filterable {
         holder.appImage.setImageDrawable(
                 appInfo.getApplicationInfo().loadIcon(mContext.getPackageManager()));
 
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = mContext.getPackageManager()
+                        .getLaunchIntentForPackage(appInfo.getApplicationInfo().packageName);
+                if(intent != null){
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                }
+            }
+        });
         return view;
     }
 
@@ -76,7 +90,6 @@ public class AppInfoAdapter extends BaseAdapter implements Filterable {
             @SuppressWarnings("unchecked")
             @Override
             protected void publishResults(CharSequence constraint,FilterResults results) {
-
                 mDisplayAppInfos = (ArrayList<AppInfo>) results.values;
                 notifyDataSetChanged();
             }
@@ -94,10 +107,9 @@ public class AppInfoAdapter extends BaseAdapter implements Filterable {
                     results.count = mOriginalAppInfos.size();
                     results.values = mOriginalAppInfos;
                 } else {
-                    constraint = constraint.toString().toLowerCase();
                     for (int i = 0; i < mOriginalAppInfos.size(); i++) {
                         String data = mOriginalAppInfos.get(i).getName();
-                        if (data.toLowerCase().contains(constraint.toString())) {
+                        if (data.toLowerCase().contains(constraint.toString().toLowerCase())) {
                             FilteredArrList.add(new AppInfo(
                                     mOriginalAppInfos.get(i).getName(),
                                     mOriginalAppInfos.get(i).getApplicationInfo()));

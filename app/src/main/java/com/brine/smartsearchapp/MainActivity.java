@@ -82,19 +82,6 @@ public class MainActivity extends Activity {
             public void afterTextChanged(Editable editable) {
             }
         });
-
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                AppInfo appInfoClicked = mListFoundAppInfo.get(i);
-                Intent intent = getPackageManager()
-                        .getLaunchIntentForPackage(appInfoClicked.getApplicationInfo().packageName);
-                if(intent != null){
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-            }
-        });
     }
 
     private List<AppInfo> getAllAppInfos(){
