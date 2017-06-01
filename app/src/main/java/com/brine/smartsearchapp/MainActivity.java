@@ -60,20 +60,13 @@ public class MainActivity extends Activity {
                     mGridView.setVisibility(View.GONE);
                     mTvMessage.setVisibility(View.VISIBLE);
                 }else{
-                    mAdapter.getFilter().filter(charSequence.toString());
+                    mAdapter.getFilter().filter(charSequence.toString().trim());
                     if(mAdapter.isFiltedData()){
                         mGridView.setVisibility(View.VISIBLE);
                         mTvMessage.setVisibility(View.GONE);
                     }else{
                         mGridView.setVisibility(View.GONE);
                         mTvMessage.setVisibility(View.VISIBLE);
-                    }
-                    if(mGridView.getHeight() > 600){
-                        mGridView.setLayoutParams(new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, 600));
-                    }else{
-                        mGridView.setLayoutParams(new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                     }
                 }
             }
