@@ -24,7 +24,6 @@ public class MainActivity extends Activity {
 
     private static List<AppInfo> mListAppInfo = new ArrayList<>();
     private GridView mGridView;
-    private EditText mEdtSearch;
     private TextView mTvMessage;
     private AppInfoAdapter mAdapter;
     private List<AppInfo> mListFoundAppInfo;
@@ -39,11 +38,14 @@ public class MainActivity extends Activity {
         }
 
         mGridView = (GridView) findViewById(R.id.gridView);
-        mEdtSearch = (EditText) findViewById(R.id.edt_search);
+        EditText mEdtSearch = (EditText) findViewById(R.id.edt_search);
         mTvMessage = (TextView) findViewById(R.id.tv_message);
         mListFoundAppInfo = new ArrayList<>();
         mAdapter = new AppInfoAdapter(this, mListFoundAppInfo);
         mGridView.setAdapter(mAdapter);
+
+        mListFoundAppInfo.addAll(mListAppInfo);
+        mAdapter.notifyDataSetChanged();
 
         mEdtSearch.addTextChangedListener(new TextWatcher() {
 
@@ -53,32 +55,31 @@ public class MainActivity extends Activity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String keyword = charSequence.toString();
+                if(keyword.trim().length() == 0){
+                    mGridView.setVisibility(View.GONE);
+                    mTvMessage.setVisibility(View.VISIBLE);
+                }else{
+                    mAdapter.getFilter().filter(charSequence.toString());
+                    if(mAdapter.isFiltedData()){
+                        mGridView.setVisibility(View.VISIBLE);
+                        mTvMessage.setVisibility(View.GONE);
+                    }else{
+                        mGridView.setVisibility(View.GONE);
+                        mTvMessage.setVisibility(View.VISIBLE);
+                    }
+                    if(mGridView.getHeight() > 600){
+                        mGridView.setLayoutParams(new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, 600));
+                    }else{
+                        mGridView.setLayoutParams(new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    }
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                String keyword = String.valueOf(editable.toString().trim());
-                mListFoundAppInfo.clear();
-                if(keyword.trim().length() == 0){
-                    mAdapter.notifyDataSetChanged();
-                }else{
-                    mListFoundAppInfo.addAll(findAppName(keyword));
-                    mAdapter.notifyDataSetChanged();
-                }
-                if(mListFoundAppInfo.size() > 0){
-                    mGridView.setVisibility(View.VISIBLE);
-                    mTvMessage.setVisibility(View.GONE);
-                }else{
-                    mGridView.setVisibility(View.GONE);
-                    mTvMessage.setVisibility(View.VISIBLE);
-                }
-                if(mGridView.getHeight() > 600){
-                    mGridView.setLayoutParams(new LinearLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, 600));
-                }else{
-                    mGridView.setLayoutParams(new LinearLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                }
             }
         });
 
@@ -110,17 +111,6 @@ public class MainActivity extends Activity {
             }
         }
         return appInfos;
-    }
-
-    private static List<AppInfo> findAppName(String keyword){
-        List<AppInfo> foundAppInfos = new ArrayList<>();
-        for(AppInfo appInfo : mListAppInfo){
-            if(appInfo.getName().toLowerCase().contains(keyword.toLowerCase())){
-                foundAppInfos.add(appInfo);
-            }
-        }
-        Log.d("FOUND", foundAppInfos.toString());
-        return foundAppInfos;
     }
 
 }

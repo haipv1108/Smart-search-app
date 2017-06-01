@@ -5,34 +5,39 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by phamhai on 31/05/2017.
  */
 
-public class AppInfoAdapter extends BaseAdapter{
-    private List<AppInfo> mListAppInfo;
+public class AppInfoAdapter extends BaseAdapter implements Filterable {
+    private List<AppInfo> mOriginalAppInfos;
+    private List<AppInfo> mDisplayAppInfos;
     private Context mContext;
     private LayoutInflater mLayoutInflater;
 
-    public AppInfoAdapter(Context _context, List<AppInfo> _listAppInfo){
+    AppInfoAdapter(Context _context, List<AppInfo> _listAppInfo){
         this.mContext = _context;
-        this.mListAppInfo = _listAppInfo;
+        this.mOriginalAppInfos = _listAppInfo;
+        this.mDisplayAppInfos = _listAppInfo;
         mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public int getCount(){
-        return mListAppInfo.size();
+        return mDisplayAppInfos.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mListAppInfo.get(i);
+        return mOriginalAppInfos.get(i);
     }
 
     @Override
@@ -52,7 +57,7 @@ public class AppInfoAdapter extends BaseAdapter{
         }else{
             holder = (ViewHolder) view.getTag();
         }
-        final AppInfo appInfo = mListAppInfo.get(i);
+        final AppInfo appInfo = mDisplayAppInfos.get(i);
         if(appInfo.getName().length() > 7){
             holder.appName.setText(appInfo.getName().substring(0, 7) + "..");
         }else{
@@ -62,6 +67,53 @@ public class AppInfoAdapter extends BaseAdapter{
                 appInfo.getApplicationInfo().loadIcon(mContext.getPackageManager()));
 
         return view;
+    }
+
+    @Override
+    public Filter getFilter() {
+        Filter filter = new Filter() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint,FilterResults results) {
+
+                mDisplayAppInfos = (ArrayList<AppInfo>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                ArrayList<AppInfo> FilteredArrList = new ArrayList<AppInfo>();
+
+                if (mOriginalAppInfos == null) {
+                    mOriginalAppInfos = new ArrayList<AppInfo>(mDisplayAppInfos);
+                }
+
+                if (constraint == null || constraint.length() == 0) {
+                    results.count = mOriginalAppInfos.size();
+                    results.values = mOriginalAppInfos;
+                } else {
+                    constraint = constraint.toString().toLowerCase();
+                    for (int i = 0; i < mOriginalAppInfos.size(); i++) {
+                        String data = mOriginalAppInfos.get(i).getName();
+                        if (data.toLowerCase().contains(constraint.toString())) {
+                            FilteredArrList.add(new AppInfo(
+                                    mOriginalAppInfos.get(i).getName(),
+                                    mOriginalAppInfos.get(i).getApplicationInfo()));
+                        }
+                    }
+                    results.count = FilteredArrList.size();
+                    results.values = FilteredArrList;
+                }
+                return results;
+            }
+        };
+        return filter;
+    }
+
+    public boolean isFiltedData(){
+        return mDisplayAppInfos.size() > 0;
     }
 
     private class ViewHolder{
